@@ -10,7 +10,7 @@ val localRiderPath = providers.gradleProperty("localRiderPath")
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(JavaVersion.current().majorVersion.toInt())
+        languageVersion = JavaLanguageVersion.of(21)
     }
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
