@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "dev.asapbuddy"
-version = "0.1.2"
+version = "1.0"
 
 val localRiderPath = providers.gradleProperty("localRiderPath")
 

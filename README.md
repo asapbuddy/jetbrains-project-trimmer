@@ -1,8 +1,8 @@
 # Rider Solution Prefix Trimmer
 
-Tiny Rider/IntelliJ Platform plugin that hides configured project-name prefixes in the Project/Solution tree.
+Плагин для JetBrains Rider, который скрывает повторяющиеся префиксы в дереве Solution/Project.
 
-Example:
+Он полезен для решений, где проекты названы полными namespace-подобными именами, а в Rider хочется видеть короткие и читаемые названия:
 
 ```text
 Company.Project.Type.Api            -> Api
@@ -11,48 +11,78 @@ Company.Project.Type.Infrastructure -> Infrastructure
 Company.Project.Type.Worker         -> Worker
 ```
 
-The plugin only changes how tree nodes are displayed. It does not rename projects, edit `.sln` files, edit `.csproj` files, or affect builds/references.
+Плагин меняет только отображение узлов в дереве проекта. Он не переименовывает проекты, не редактирует `.sln` или `.csproj`, не меняет references и не влияет на сборку.
 
-## Build
+## Установка
 
-This project is a standard Gradle IntelliJ plugin project:
+1. Скачайте zip-архив плагина из GitHub Releases:
+   <https://github.com/asapbuddy/jetbrains-project-trimmer/releases>
+2. Откройте Rider.
+3. Перейдите в `Settings | Plugins`.
+4. Нажмите на шестеренку и выберите `Install Plugin from Disk...`.
+5. Выберите скачанный zip-архив.
+6. Перезапустите Rider, если IDE попросит это сделать.
 
-```bash
-gradle buildPlugin
-```
+## Настройка префиксов
 
-The installable ZIP will be created under:
+Префиксы можно указать двумя способами:
+
+- через меню `Tools | Set Solution Prefix to Hide...`
+- через настройки `Settings | Tools | Solution Prefix Trimmer`
+
+Указывайте один префикс на строку:
 
 ```text
-build/distributions/
+Company.Project.Type
+Another.Long.Prefix
 ```
 
-If you prefer a wrapper, run this once in the project directory:
+Плагин одинаково обрабатывает префиксы с точкой на конце и без нее. Например, `Company.Project.Type` и `Company.Project.Type.` дадут один и тот же результат.
 
-```bash
-gradle wrapper
-./gradlew buildPlugin
-```
+Если имя проекта не начинается ни с одного из указанных префиксов, оно останется без изменений.
 
-## Install In Rider
+## Пример
 
-1. Build the plugin ZIP.
-2. Open Rider.
-3. Go to `Settings | Plugins`.
-4. Open the gear menu and choose `Install Plugin from Disk...`.
-5. Select the ZIP from `build/distributions`.
-
-## Configure
-
-Use either:
-
-- `Tools | Set Solution Prefix to Hide...`
-- `Settings | Tools | Solution Prefix Trimmer`
-
-Enter one prefix per line, for example:
+Настройка:
 
 ```text
 Company.Project.Type
 ```
 
-The plugin treats `Company.Project.Type` and `Company.Project.Type.` the same way.
+До:
+
+```text
+Company.Project.Type.Api
+Company.Project.Type.Application
+Company.Project.Type.Infrastructure
+Company.Project.Type.Worker
+```
+
+После:
+
+```text
+Api
+Application
+Infrastructure
+Worker
+```
+
+## Сборка из исходников
+
+Для сборки нужен JDK 21.
+
+```bash
+./gradlew buildPlugin
+```
+
+Готовый zip-архив появится в:
+
+```text
+build/distributions/
+```
+
+Для полной проверки проекта:
+
+```bash
+./gradlew build
+```
