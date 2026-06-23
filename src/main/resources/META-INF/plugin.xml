@@ -1,0 +1,35 @@
+<idea-plugin>
+    <id>dev.asapbuddy.solution-prefix-trimmer</id>
+    <name>Solution Prefix Trimmer</name>
+    <vendor>asapbuddy</vendor>
+
+    <description><![CDATA[
+        Hides configured project-name prefixes in the Rider Project/Solution tree.
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.rider</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <projectService serviceImplementation="dev.asapbuddy.prefixtrimmer.PrefixTrimmerSettings"/>
+        <projectConfigurable
+                instance="dev.asapbuddy.prefixtrimmer.PrefixTrimmerConfigurable"
+                displayName="Solution Prefix Trimmer"
+                parentId="tools"/>
+        <projectViewNodeDecorator
+                implementation="dev.asapbuddy.prefixtrimmer.PrefixTrimmerProjectViewNodeDecorator"
+                order="first"/>
+        <solutionExplorerCustomization
+                implementation="dev.asapbuddy.prefixtrimmer.SolutionExplorerPrefixTrimmerCustomization"/>
+    </extensions>
+
+    <actions>
+        <action
+                id="SolutionPrefixTrimmer.SetPrefix"
+                class="dev.asapbuddy.prefixtrimmer.SetPrefixAction"
+                text="Set Solution Prefix to Hide..."
+                description="Configure the prefix hidden from project names in the Solution tree">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>
