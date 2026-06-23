@@ -57,6 +57,6 @@ jobs:
           path: release-assets
 
       - name: Attach plugin archive to release
-        run: gh release upload "${{ github.event.release.tag_name }}" release-assets/*.zip --clobber
+        run: gh release upload "${{ github.event.release.tag_name }}" release-assets/*.zip --repo "${{ github.repository }}" --clobber
         env:
           GH_TOKEN: ${{ github.token }}
