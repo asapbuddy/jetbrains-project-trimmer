@@ -41,3 +41,22 @@ jobs:
           name: rider-solution-prefix-trimmer
           path: build/distributions/*.zip
           if-no-files-found: error
+
+  attach-release-asset:
+    if: github.event_name == 'release'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download plugin archive
+        uses: actions/download-artifact@v4
+        with:
+          name: rider-solution-prefix-trimmer
+          path: release-assets
+
+      - name: Attach plugin archive to release
+        run: gh release upload "${{ github.event.release.tag_name }}" release-assets/*.zip --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
