@@ -5,10 +5,10 @@ Tiny Rider/IntelliJ Platform plugin that hides configured project-name prefixes 
 Example:
 
 ```text
-Order.Kuper.Adapter.Api            -> Api
-Order.Kuper.Adapter.Application    -> Application
-Order.Kuper.Adapter.Infrastructure -> Infrastructure
-Order.Kuper.Adapter.Worker         -> Worker
+Company.Project.Type.Api            -> Api
+Company.Project.Type.Application    -> Application
+Company.Project.Type.Infrastructure -> Infrastructure
+Company.Project.Type.Worker         -> Worker
 ```
 
 The plugin only changes how tree nodes are displayed. It does not rename projects, edit `.sln` files, edit `.csproj` files, or affect builds/references.
@@ -52,7 +52,7 @@ Use either:
 Enter one prefix per line, for example:
 
 ```text
-Order.Kuper.Adapter
+Company.Project.Type
 ```
 
-The plugin treats `Order.Kuper.Adapter` and `Order.Kuper.Adapter.` the same way.
+The plugin treats `Company.Project.Type` and `Company.Project.Type.` the same way.
