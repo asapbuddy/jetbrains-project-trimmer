@@ -13,11 +13,11 @@ public final class PrefixTrimmerProjectViewNodeDecorator implements ProjectViewN
             return;
         }
 
-        PrefixTrimmerSettings settings = PrefixTrimmerSettings.getInstance(project);
-        if (!settings.isEnabled() || settings.getPrefixes().isEmpty()) {
+        EffectivePrefixSettings settings = EffectivePrefixSettings.of(project);
+        if (!settings.isActive()) {
             return;
         }
 
-        PrefixPresentationTrimmer.trim(data, settings);
+        PrefixPresentationTrimmer.trim(data, settings.prefixes());
     }
 }

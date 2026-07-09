@@ -5,27 +5,28 @@ import com.intellij.ide.util.treeView.PresentableNodeDescriptor;
 import com.intellij.ui.SimpleTextAttributes;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 final class PrefixPresentationTrimmer {
     private PrefixPresentationTrimmer() {
     }
 
-    static void trim(PresentationData data, PrefixTrimmerSettings settings) {
-        if (trimPresentableText(data, settings)) {
+    static void trim(PresentationData data, Collection<String> prefixes) {
+        if (trimPresentableText(data, prefixes)) {
             return;
         }
 
-        trimFirstColoredFragment(data, settings);
+        trimFirstColoredFragment(data, prefixes);
     }
 
-    private static boolean trimPresentableText(PresentationData data, PrefixTrimmerSettings settings) {
+    private static boolean trimPresentableText(PresentationData data, Collection<String> prefixes) {
         String originalText = data.getPresentableText();
         if (originalText == null || originalText.isBlank()) {
             return false;
         }
 
-        String trimmedText = PrefixTrimmer.trim(originalText, settings.getPrefixes());
+        String trimmedText = PrefixTrimmer.trim(originalText, prefixes);
         if (trimmedText.equals(originalText) || trimmedText.isBlank()) {
             return false;
         }
@@ -36,7 +37,7 @@ final class PrefixPresentationTrimmer {
         return true;
     }
 
-    private static void trimFirstColoredFragment(PresentationData data, PrefixTrimmerSettings settings) {
+    private static void trimFirstColoredFragment(PresentationData data, Collection<String> prefixes) {
         List<PresentableNodeDescriptor.ColoredFragment> fragments = new ArrayList<>(data.getColoredText());
         if (fragments.isEmpty()) {
             return;
@@ -48,7 +49,7 @@ final class PrefixPresentationTrimmer {
             return;
         }
 
-        String trimmedText = PrefixTrimmer.trim(originalText, settings.getPrefixes());
+        String trimmedText = PrefixTrimmer.trim(originalText, prefixes);
         if (trimmedText.equals(originalText) || trimmedText.isBlank()) {
             return;
         }

@@ -1,6 +1,7 @@
 package dev.asapbuddy.prefixtrimmer;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -27,6 +28,10 @@ public final class PrefixTrimmer {
         }
 
         return current;
+    }
+
+    public static @NotNull List<String> normalizePrefixes(@Nullable Collection<String> prefixes) {
+        return prefixes == null ? new ArrayList<>() : parsePrefixes(prefixesToText(prefixes));
     }
 
     public static @NotNull List<String> parsePrefixes(@NotNull String text) {

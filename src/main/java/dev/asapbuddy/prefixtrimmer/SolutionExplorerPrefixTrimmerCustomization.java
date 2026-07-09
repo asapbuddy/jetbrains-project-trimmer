@@ -14,13 +14,13 @@ public final class SolutionExplorerPrefixTrimmerCustomization extends SolutionEx
 
     @Override
     public void updateNode(@NotNull PresentationData data, @NotNull ProjectModelEntity entity) {
-        PrefixTrimmerSettings settings = PrefixTrimmerSettings.getInstance(getProject());
-        if (!settings.isEnabled() || settings.getPrefixes().isEmpty()) {
+        EffectivePrefixSettings settings = EffectivePrefixSettings.of(getProject());
+        if (!settings.isActive()) {
             return;
         }
 
         if (entity.getDescriptor() instanceof RdProjectDescriptor) {
-            PrefixPresentationTrimmer.trim(data, settings);
+            PrefixPresentationTrimmer.trim(data, settings.prefixes());
         }
     }
 }

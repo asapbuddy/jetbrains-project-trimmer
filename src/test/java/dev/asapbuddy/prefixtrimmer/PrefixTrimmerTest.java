@@ -2,6 +2,7 @@ package dev.asapbuddy.prefixtrimmer;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -53,5 +54,18 @@ class PrefixTrimmerTest {
                 List.of("Order.Kuper.Adapter", "Billing.Core"),
                 PrefixTrimmer.parsePrefixes("Order.Kuper.Adapter.\nBilling.Core; Order.Kuper.Adapter")
         );
+    }
+
+    @Test
+    void normalizePrefixesDropsBlanksAndDuplicates() {
+        assertEquals(
+                List.of("Order.Kuper.Adapter", "Billing.Core"),
+                PrefixTrimmer.normalizePrefixes(Arrays.asList("Order.Kuper.Adapter.", "  ", "Billing.Core", "Order.Kuper.Adapter"))
+        );
+    }
+
+    @Test
+    void normalizePrefixesTreatsNullAsEmpty() {
+        assertEquals(List.of(), PrefixTrimmer.normalizePrefixes(null));
     }
 }

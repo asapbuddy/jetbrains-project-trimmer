@@ -1,29 +1,29 @@
 package dev.asapbuddy.prefixtrimmer;
 
 import com.intellij.openapi.options.Configurable;
-import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.options.SearchableConfigurable;
 import com.intellij.openapi.project.Project;
 import com.intellij.ui.components.JBCheckBox;
-import com.intellij.ui.components.JBLabel;
-import com.intellij.ui.components.JBScrollPane;
-import com.intellij.ui.components.JBTextArea;
 import com.intellij.util.ui.JBUI;
 import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.BoxLayout;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import java.awt.BorderLayout;
-import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.List;
 
 public final class PrefixTrimmerConfigurable implements SearchableConfigurable, Configurable.NoScroll {
     private final Project project;
+    private JBCheckBox useGlobalCheckBox;
     private JBCheckBox enabledCheckBox;
-    private JBTextArea prefixesTextArea;
+    private PrefixesEditor prefixesEditor;
     private JPanel panel;
+    private boolean projectEnabled = true;
+    private List<String> projectPrefixes = new ArrayList<>();
 
     public PrefixTrimmerConfigurable(@NotNull Project project) {
         this.project = project;
@@ -31,73 +31,106 @@ public final class PrefixTrimmerConfigurable implements SearchableConfigurable, 
 
     @Override
     public @NotNull String getId() {
-        return "dev.asapbuddy.solution-prefix-trimmer";
+        return "dev.asapbuddy.solution-prefix-trimmer.project";
     }
 
     @Override
     public @Nls(capitalization = Nls.Capitalization.Title) String getDisplayName() {
-        return "Solution Prefix Trimmer";
+        return "Project Overrides";
     }
 
     @Override
     public @Nullable JComponent createComponent() {
+        useGlobalCheckBox = new JBCheckBox("Use global prefixes");
         enabledCheckBox = new JBCheckBox("Hide configured prefixes in the Project/Solution tree");
-        prefixesTextArea = new JBTextArea();
-        prefixesTextArea.setRows(6);
-        prefixesTextArea.setLineWrap(false);
+        prefixesEditor = new PrefixesEditor("Prefixes for this project only, one per line:");
 
-        JBLabel label = new JBLabel("Prefixes, one per line:");
-        JBLabel example = new JBLabel("Example: Order.Kuper.Adapter");
-
-        JPanel content = new JPanel(new BorderLayout(0, JBUI.scale(6)));
-        content.add(label, BorderLayout.NORTH);
-        JBScrollPane scrollPane = new JBScrollPane(prefixesTextArea);
-        scrollPane.setPreferredSize(new Dimension(JBUI.scale(420), JBUI.scale(120)));
-        content.add(scrollPane, BorderLayout.CENTER);
-        content.add(example, BorderLayout.SOUTH);
+        JPanel checkBoxes = new JPanel();
+        checkBoxes.setLayout(new BoxLayout(checkBoxes, BoxLayout.Y_AXIS));
+        checkBoxes.add(useGlobalCheckBox);
+        checkBoxes.add(enabledCheckBox);
 
         panel = new JPanel(new BorderLayout(0, JBUI.scale(10)));
         panel.setBorder(JBUI.Borders.empty(8));
-        panel.add(enabledCheckBox, BorderLayout.NORTH);
-        panel.add(content, BorderLayout.CENTER);
+        panel.add(checkBoxes, BorderLayout.NORTH);
+        panel.add(prefixesEditor.getPanel(), BorderLayout.CENTER);
 
         reset();
+        useGlobalCheckBox.addActionListener(event -> {
+            if (useGlobalCheckBox.isSelected()) {
+                projectEnabled = enabledCheckBox.isSelected();
+                projectPrefixes = prefixesEditor.getPrefixes();
+            }
+            showEffectiveSource();
+        });
         return panel;
     }
 
     @Override
     public boolean isModified() {
+        if (useGlobalCheckBox == null || enabledCheckBox == null || prefixesEditor == null) {
+            return false;
+        }
+
         PrefixTrimmerSettings settings = PrefixTrimmerSettings.getInstance(project);
-        return enabledCheckBox != null
-                && prefixesTextArea != null
-                && (enabledCheckBox.isSelected() != settings.isEnabled()
-                || !PrefixTrimmer.parsePrefixes(prefixesTextArea.getText()).equals(settings.getPrefixes()));
+        if (useGlobalCheckBox.isSelected() != settings.isUseGlobalPrefixes()) {
+            return true;
+        }
+        if (useGlobalCheckBox.isSelected()) {
+            return false;
+        }
+
+        return enabledCheckBox.isSelected() != settings.isEnabled()
+                || !prefixesEditor.getPrefixes().equals(settings.getPrefixes());
     }
 
     @Override
-    public void apply() throws ConfigurationException {
+    public void apply() {
         PrefixTrimmerSettings settings = PrefixTrimmerSettings.getInstance(project);
-        List<String> prefixes = PrefixTrimmer.parsePrefixes(prefixesTextArea.getText());
-        settings.setEnabled(enabledCheckBox.isSelected());
-        settings.setPrefixes(prefixes);
+        boolean useGlobal = useGlobalCheckBox.isSelected();
+        settings.setUseGlobalPrefixes(useGlobal);
+        if (!useGlobal) {
+            projectEnabled = enabledCheckBox.isSelected();
+            projectPrefixes = prefixesEditor.getPrefixes();
+            settings.setEnabled(projectEnabled);
+            settings.setPrefixes(projectPrefixes);
+        }
         ProjectViewRefresher.refresh(project);
     }
 
     @Override
     public void reset() {
-        if (enabledCheckBox == null || prefixesTextArea == null) {
+        if (useGlobalCheckBox == null || enabledCheckBox == null || prefixesEditor == null) {
             return;
         }
 
         PrefixTrimmerSettings settings = PrefixTrimmerSettings.getInstance(project);
-        enabledCheckBox.setSelected(settings.isEnabled());
-        prefixesTextArea.setText(PrefixTrimmer.prefixesToText(settings.getPrefixes()));
+        projectEnabled = settings.isEnabled();
+        projectPrefixes = new ArrayList<>(settings.getPrefixes());
+        useGlobalCheckBox.setSelected(settings.isUseGlobalPrefixes());
+        showEffectiveSource();
     }
 
     @Override
     public void disposeUIResources() {
+        useGlobalCheckBox = null;
         enabledCheckBox = null;
-        prefixesTextArea = null;
+        prefixesEditor = null;
         panel = null;
+    }
+
+    private void showEffectiveSource() {
+        boolean useGlobal = useGlobalCheckBox.isSelected();
+        if (useGlobal) {
+            PrefixTrimmerApplicationSettings globalSettings = PrefixTrimmerApplicationSettings.getInstance();
+            enabledCheckBox.setSelected(globalSettings.isEnabled());
+            prefixesEditor.setPrefixes(globalSettings.getPrefixes());
+        } else {
+            enabledCheckBox.setSelected(projectEnabled);
+            prefixesEditor.setPrefixes(projectPrefixes);
+        }
+
+        enabledCheckBox.setEnabled(!useGlobal);
+        prefixesEditor.setEditable(!useGlobal);
     }
 }

@@ -1,26 +1,25 @@
 package dev.asapbuddy.prefixtrimmer;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.Service;
 import com.intellij.openapi.components.Storage;
-import com.intellij.openapi.components.StoragePathMacros;
-import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Service(Service.Level.PROJECT)
+@Service(Service.Level.APP)
 @com.intellij.openapi.components.State(
-        name = "SolutionPrefixTrimmerSettings",
-        storages = @Storage(StoragePathMacros.WORKSPACE_FILE)
+        name = "SolutionPrefixTrimmerApplicationSettings",
+        storages = @Storage("solution-prefix-trimmer.xml")
 )
-public final class PrefixTrimmerSettings implements PersistentStateComponent<PrefixTrimmerSettings.SettingsState> {
+public final class PrefixTrimmerApplicationSettings implements PersistentStateComponent<PrefixTrimmerApplicationSettings.SettingsState> {
     private SettingsState state = new SettingsState();
 
-    public static @NotNull PrefixTrimmerSettings getInstance(@NotNull Project project) {
-        return project.getService(PrefixTrimmerSettings.class);
+    public static @NotNull PrefixTrimmerApplicationSettings getInstance() {
+        return ApplicationManager.getApplication().getService(PrefixTrimmerApplicationSettings.class);
     }
 
     @Override
@@ -32,15 +31,6 @@ public final class PrefixTrimmerSettings implements PersistentStateComponent<Pre
     public void loadState(@NotNull SettingsState state) {
         this.state = state;
         this.state.prefixes = PrefixTrimmer.normalizePrefixes(state.prefixes);
-    }
-
-    public boolean isUseGlobalPrefixes() {
-        Boolean useGlobalPrefixes = state.useGlobalPrefixes;
-        return useGlobalPrefixes == null ? getPrefixes().isEmpty() : useGlobalPrefixes;
-    }
-
-    public void setUseGlobalPrefixes(boolean useGlobalPrefixes) {
-        state.useGlobalPrefixes = useGlobalPrefixes;
     }
 
     public boolean isEnabled() {
@@ -65,7 +55,5 @@ public final class PrefixTrimmerSettings implements PersistentStateComponent<Pre
     public static final class SettingsState {
         public boolean enabled = true;
         public List<String> prefixes = new ArrayList<>();
-        /** {@code null} — флаг ещё не задан: настройки достались от версии плагина без глобального уровня. */
-        public Boolean useGlobalPrefixes;
     }
 }

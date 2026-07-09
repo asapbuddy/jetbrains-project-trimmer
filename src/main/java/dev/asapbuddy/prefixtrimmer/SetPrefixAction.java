@@ -10,6 +10,13 @@ import org.jetbrains.annotations.NotNull;
 import java.util.List;
 
 public final class SetPrefixAction extends DumbAwareAction {
+    private static final String GLOBAL_MESSAGE =
+            "Prefix to hide from project names. This project follows the global prefixes, so the change applies to every project. "
+                    + "Use Settings | Tools | Solution Prefix Trimmer for multiple prefixes.";
+    private static final String PROJECT_MESSAGE =
+            "Prefix to hide from project names. This project overrides the global prefixes. "
+                    + "Use Settings | Tools | Solution Prefix Trimmer for multiple prefixes.";
+
     @Override
     public void actionPerformed(@NotNull AnActionEvent event) {
         Project project = event.getProject();
@@ -17,11 +24,11 @@ public final class SetPrefixAction extends DumbAwareAction {
             return;
         }
 
-        PrefixTrimmerSettings settings = PrefixTrimmerSettings.getInstance(project);
-        String currentPrefixes = PrefixTrimmer.prefixesToText(settings.getPrefixes());
+        boolean useGlobal = PrefixTrimmerSettings.getInstance(project).isUseGlobalPrefixes();
+        String currentPrefixes = PrefixTrimmer.prefixesToText(EffectivePrefixSettings.of(project).prefixes());
         String input = Messages.showInputDialog(
                 project,
-                "Prefix to hide from project names. Use Settings | Tools | Solution Prefix Trimmer for multiple prefixes.",
+                useGlobal ? GLOBAL_MESSAGE : PROJECT_MESSAGE,
                 "Set Solution Prefix to Hide",
                 null,
                 currentPrefixes.lines().findFirst().orElse(""),
@@ -33,6 +40,15 @@ public final class SetPrefixAction extends DumbAwareAction {
         }
 
         List<String> prefixes = PrefixTrimmer.parsePrefixes(input);
+        if (useGlobal) {
+            PrefixTrimmerApplicationSettings settings = PrefixTrimmerApplicationSettings.getInstance();
+            settings.setPrefixes(prefixes);
+            settings.setEnabled(!prefixes.isEmpty());
+            ProjectViewRefresher.refreshAll();
+            return;
+        }
+
+        PrefixTrimmerSettings settings = PrefixTrimmerSettings.getInstance(project);
         settings.setPrefixes(prefixes);
         settings.setEnabled(!prefixes.isEmpty());
         ProjectViewRefresher.refresh(project);

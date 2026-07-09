@@ -3,11 +3,18 @@ package dev.asapbuddy.prefixtrimmer;
 import com.intellij.ide.projectView.ProjectView;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectManager;
 import com.jetbrains.rider.projectView.ProjectModelViewUpdater;
 import org.jetbrains.annotations.NotNull;
 
 public final class ProjectViewRefresher {
     private ProjectViewRefresher() {
+    }
+
+    public static void refreshAll() {
+        for (Project project : ProjectManager.getInstance().getOpenProjects()) {
+            refresh(project);
+        }
     }
 
     public static void refresh(@NotNull Project project) {

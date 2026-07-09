@@ -11,11 +11,18 @@
     <depends>com.intellij.modules.rider</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="dev.asapbuddy.prefixtrimmer.PrefixTrimmerApplicationSettings"/>
         <projectService serviceImplementation="dev.asapbuddy.prefixtrimmer.PrefixTrimmerSettings"/>
-        <projectConfigurable
-                instance="dev.asapbuddy.prefixtrimmer.PrefixTrimmerConfigurable"
+        <applicationConfigurable
+                id="dev.asapbuddy.solution-prefix-trimmer"
+                instance="dev.asapbuddy.prefixtrimmer.PrefixTrimmerApplicationConfigurable"
                 displayName="Solution Prefix Trimmer"
                 parentId="tools"/>
+        <projectConfigurable
+                id="dev.asapbuddy.solution-prefix-trimmer.project"
+                instance="dev.asapbuddy.prefixtrimmer.PrefixTrimmerConfigurable"
+                displayName="Project Overrides"
+                parentId="dev.asapbuddy.solution-prefix-trimmer"/>
         <projectViewNodeDecorator
                 implementation="dev.asapbuddy.prefixtrimmer.PrefixTrimmerProjectViewNodeDecorator"
                 order="first"/>
